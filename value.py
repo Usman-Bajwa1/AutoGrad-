@@ -28,9 +28,6 @@ class Value:
         out._backward = _backward
         return out
     
-    def __radd__(self, other):
-        return self + other
-    
     def __mul__(self, other):
         
         other = other if isinstance(other, Value) else Value(other)
@@ -42,12 +39,13 @@ class Value:
         return out 
     
     def __pow__(self, other):
-        other =  other if isinstance(other, Value) else Value(other)
-        out = Value(self.data ** other.data, (self, ), '**')
+        other = other if isinstance(other, Value) else Value(other)
+        out = Value(self.data ** other.data, (self, other), '**')
         def _backward():
             self.grad += (other.data * (self.data ** (other.data - 1))) * out.grad
+            other.grad += (math.log(self.data) * out.data) * out.grad
         out._backward = _backward
-        return out 
+        return out
     
     def __radd__(self, other):
         return self + other
@@ -125,15 +123,15 @@ class Value:
 
     def backward(self):
         topos = []
-        visisted = set()
+        visited = set()
         def build_topo(v):
-            visisted.add(v)
-            for children in v._prev:
-                build_topo(children)
+            visited.add(v)
+            for child in v._prev:
+                if child not in visited:
+                    build_topo(child)
             topos.append(v)
         build_topo(self)
 
-        print(f"The full topo list = {topos}")
         self.grad = 1.0
         for node in reversed(topos):
             node._backward()
@@ -142,20 +140,19 @@ class Value:
 
 
 
-def main():
-    a = Value(3)    ; a.label = 'a'
-    b = Value(4)    ; b.label = 'b'
-    c = a * b       ; c.label = 'c'
-    d = c.sigmoid() ; d.label = 'd'
-    e = d.tanh()    ; e.label = 'e' 
-    f = e.ReLU()    ; f.label = 'f'
-    g = f.Leaky_ReLU() ; g.label = 'g'
-    h = g.ELU()     ; h.label = 'h'
-
-    h.backward()
-    draw_dot(h)
-
-main()
+#def main():
+#    a = Value(3)    ; a.label = 'a'
+#    b = Value(4)    ; b.label = 'b'
+#    c = a * b       ; c.label = 'c'
+#    d = c.sigmoid() ; d.label = 'd'
+#    e = d.tanh()    ; e.label = 'e' 
+#    f = e.ReLU()    ; f.label = 'f'
+#    g = f.Leaky_ReLU() ; g.label = 'g'
+#    h = g.ELU()     ; h.label = 'h'
+#
+#    h.backward()
+#    draw_dot(h)
+#main()
 
 
 
