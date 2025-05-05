@@ -1,9 +1,10 @@
-import numpy as np
-#from neural_net import MLP
 from value import Value
 
-
 def RMSE_loss(y_hat, y):
+    """
+    Computes the Root Mean Squared Error (RMSE) between predictions and targets.
+    Formula: RMSE = sqrt(mean((y - y_hat)^2))
+    """
     if not isinstance(y_hat, list):
         y_hat = [y_hat]
     if not isinstance(y, list):
@@ -13,6 +14,6 @@ def RMSE_loss(y_hat, y):
     out = out ** 0.5 
     return out
 
-def main():
-    pass        
-main()
+
+
+

@@ -1,8 +1,5 @@
-import numpy as np
 import random
-import math
 from value import Value
-from Graph import draw_dot
 from loss import *
 
 
@@ -66,12 +63,6 @@ class MLP(Module):
         return [p for layer in self.layers for p in layer.parameters()]    
     
 
-
-def main():
-    pass
-    
-
-main()
 
 
     

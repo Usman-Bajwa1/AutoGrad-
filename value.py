@@ -1,8 +1,4 @@
-import random 
-import numpy as np 
 import math
-import matplotlib.pyplot as plt
-from Graph import draw_dot
 
 class Value:
 
@@ -39,11 +35,12 @@ class Value:
         return out 
     
     def __pow__(self, other):
+
+        assert isinstance(other, (int, float)), "onlyu supports int/float"
         other = other if isinstance(other, Value) else Value(other)
         out = Value(self.data ** other.data, (self, other), '**')
         def _backward():
             self.grad += (other.data * (self.data ** (other.data - 1))) * out.grad
-            other.grad += (math.log(self.data) * out.data) * out.grad
         out._backward = _backward
         return out
     
@@ -57,13 +54,16 @@ class Value:
         return self + (-other)
         
     def __rsub__(self, other):
-        return self - other
+        return other + (-self)
     
     def __rpow__(self, other):
-        return self ** other
+        return other ** self
     
     def __truediv__(self, other):
         return self * (other ** -1)
+    
+    def __rtruediv__(self, other):
+        return other * self**-1 
     
     def __neg__(self):
         return self * (-1)
@@ -75,6 +75,15 @@ class Value:
           self.grad += out.data * out.grad
       out._backward = _backward
       return out 
+    
+    def log(self):
+        out = Value(math.log(self.data), (self,), 'log')
+
+        def _backward():
+            self.grad += (1/self.data) * out.grad
+        out._backward= _backward 
+
+        return out
     
     def sigmoid(self):
         
@@ -136,97 +145,3 @@ class Value:
         for node in reversed(topos):
             node._backward()
 
-    
-
-
-
-#def main():
-#    a = Value(3)    ; a.label = 'a'
-#    b = Value(4)    ; b.label = 'b'
-#    c = a * b       ; c.label = 'c'
-#    d = c.sigmoid() ; d.label = 'd'
-#    e = d.tanh()    ; e.label = 'e' 
-#    f = e.ReLU()    ; f.label = 'f'
-#    g = f.Leaky_ReLU() ; g.label = 'g'
-#    h = g.ELU()     ; h.label = 'h'
-#
-#    h.backward()
-#    draw_dot(h)
-#main()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-'''
-x1 = Value(2.0, label='x1')
-x2 = Value(0.0, label='x2')
-
-w1 = Value(-3.0, label='w1')
-w2 = Value(1.0, label='w2')
-
-b = Value(6.88813735870195432, label='b')
-
-x1w1 = x1 * w1; x1w1.label = 'x1w1'
-x2w2 = x2 * w2; x2w2.label = 'x2w2'
-x1w1x2w2 = x1w1 + x2w2; x1w1x2w2.label = 'x1w1 + x2w2'
-n = x1w1x2w2 + b; n.label = 'n'
-e = (2*n).exp() ; e.label = 'e'
-o = (e - 1) / (e + 1); o.label = 'o'
-o.backward()
-draw_dot(o)
-w =  [Value(random.uniform(-1,1)) for _ in range(3)]
-b =  Value(random.uniform(-1,1))
-
-print(b)
-x = [2,2,2]
-a = sum([w * i for w,i in zip(w, x)],b)
-    
-print (a)
-'''
